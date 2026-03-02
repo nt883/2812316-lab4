@@ -6,7 +6,6 @@ const countryInfo = document.getElementById('country-info');
 const borderingCountries = document.getElementById('bordering-countries');
 const errorMessage = document.getElementById('error-message');
 
-// Main search function
 async function searchCountry(countryName) {
 
     if (!countryName) {
@@ -24,8 +23,10 @@ async function searchCountry(countryName) {
         // Show spinner
         spinner.classList.remove('hidden');
 
-        // Fetch country data
-        const response = await fetch(`https://restcountries.com/v3.1/name/${countryName}`);
+        // Fetch country (exact match)
+        const response = await fetch(
+            `https://restcountries.com/v3.1/name/${countryName}?fullText=true`
+        );
 
         if (!response.ok) {
             throw new Error("Country not found.");
@@ -34,11 +35,11 @@ async function searchCountry(countryName) {
         const data = await response.json();
         const country = data[0];
 
-        // Update country info
+        // Display main country info
         countryInfo.innerHTML = `
             <h2>${country.name.common}</h2>
             <p><strong>Capital:</strong> ${country.capital ? country.capital[0] : "N/A"}</p>
-            <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
+            <p><strong>Population:</strong> ${country.population.toLocaleString("en-US")}</p>
             <p><strong>Region:</strong> ${country.region}</p>
             <img src="${country.flags.svg}" alt="${country.name.common} flag">
         `;
@@ -50,7 +51,10 @@ async function searchCountry(countryName) {
 
             for (let code of country.borders) {
 
-                const borderResponse = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
+                const borderResponse = await fetch(
+                    `https://restcountries.com/v3.1/alpha/${code}`
+                );
+
                 const borderData = await borderResponse.json();
                 const borderCountry = borderData[0];
 
@@ -76,18 +80,17 @@ async function searchCountry(countryName) {
     }
 }
 
-// Error function
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
 }
 
-// Event listeners
+// Button click
 searchBtn.addEventListener('click', () => {
     searchCountry(countryInput.value.trim());
 });
 
-// Press Enter support
+// Enter key support
 countryInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         searchCountry(countryInput.value.trim());
